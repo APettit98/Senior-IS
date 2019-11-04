@@ -1,0 +1,30 @@
+{% extends './base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row mt-5 justify-content-around">
+    <div class="col-4 mx-auto">
+        <div class="card text-center border-primary mt-5 mx-auto">
+            <div class="card-header">
+                How to use?
+            </div>
+            <div class="card-body">
+                Here's how to use the application.
+            </div>
+        </div>
+
+    </div>
+    <div class="col-4 mx-auto">
+        <div class="card text-center border-primary mt-5 mx-auto">
+        <div class="card-header">
+            Find a Meeting Place!
+        </div>
+        <div class="card-body mx-auto">
+            {% crispy form %}
+        </div>
+    </div>
+    </div>
+</div>
+
+{% endblock %}
+
