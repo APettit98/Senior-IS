@@ -9,7 +9,7 @@ def index(request):
         form = EnterLocationsForm(request.POST)
         if form.is_valid():
             request.session['location_input'] = form.cleaned_data
-            return HttpResponseRedirect('/about')
+            return HttpResponseRedirect('/results')
     else:
         form = EnterLocationsForm()
 
