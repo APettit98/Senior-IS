@@ -1,7 +1,6 @@
 from django import forms
-from crispy_forms.helper import FormHelper, reverse
-from crispy_forms.layout import Submit, Layout, Field, Row, Column, Div, ButtonHolder
-from crispy_forms.bootstrap import FormActions
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit, Layout, Row, Column, ButtonHolder
 
 
 class EnterLocationsForm(forms.Form):
@@ -10,7 +9,6 @@ class EnterLocationsForm(forms.Form):
     location2 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Address 2'}))
     location3 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Address 3'}))
     extra_location_count = forms.CharField(widget=forms.HiddenInput(attrs={'id': 'count'}), initial=0)
-
 
     helper = FormHelper()
     helper.form_class = 'form-horizontal'
@@ -37,13 +35,8 @@ class EnterLocationsForm(forms.Form):
         )
     )
 
-    # helper.all().wrap(Div, css_class="form-group-row")
-    # helper.all().wrap_together(Div, css_class="form-group")
-
     def __init__(self, *args, **kwargs):
-        print(kwargs)
         extra_locations = kwargs.pop('extra', 0)
-        print(extra_locations)
 
         super().__init__(*args, **kwargs)
         self.fields['extra_location_count'].initial = extra_locations

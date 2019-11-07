@@ -8,6 +8,7 @@ def index(request):
     if request.method == 'POST':
         form = EnterLocationsForm(request.POST)
         if form.is_valid():
+            print(form.cleaned_data)
             request.session['location_input'] = form.cleaned_data
             return HttpResponseRedirect('/results')
     else:
