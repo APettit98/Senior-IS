@@ -8,9 +8,9 @@ def index(request):
     if request.method == 'POST':
         form = EnterLocationsForm(request.POST)
         if form.is_valid():
-            print(form.cleaned_data)
+            locations = form.cleaned_data
             request.session['location_input'] = form.cleaned_data
-            return HttpResponseRedirect('/results')
+            return HttpResponseRedirect('/results', {'locations': locations})
     else:
         form = EnterLocationsForm()
 
@@ -18,7 +18,7 @@ def index(request):
 
 
 def about(request):
-    print(request.session.get('location_input'))
+
     return render(request, 'mpf/about.html')
 
 
@@ -27,7 +27,11 @@ def contact(request):
 
 
 def results(request):
-    return render(request, 'mpf/results.html')
+    locations = request.session['location_input']
+    location_list = list(locations.values())[:-1]
+    mapbox_private_token = "sk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazJwNWtodXgwMHQwM25ybXo1a3BmY295In0.7oyWAaqB1aJJJp9oGmZPug"
+    return render(request, 'mpf/results.html', {'locations': locations, 'mapbox_private_token': mapbox_private_token,
+                                                'location_list': location_list})
 
 
 def help(request):
