@@ -5,15 +5,18 @@
 {% block content %}
 <div class="row mt-5 justify-content-around">
     <div class="col-4 mx-auto">
-        <div class="card text-center border-primary mt-5 mx-auto">
-            <div class="card-header">
+        <div class="card text-left border-primary mt-5 mx-auto">
+            <div class="card-header text-center">
                 How to use?
             </div>
             <div class="card-body">
-                Here's how to use the application.
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><b>Step 1:</b> Type in your starting addresses (press the '+' to add more if needed)</li>
+                    <li class="list-group-item"><b>Step 2:</b> Press 'Go'</li>
+                    <li class="list-group-item"><b>Step 3:</b> That's it! The application is finding your meeting place and will show it to you as soon as possible</li>
+                </ul>
             </div>
         </div>
-
     </div>
     <div class="col-4 mx-auto">
         <div class="card text-center border-primary mt-5 mx-auto">
@@ -28,6 +31,10 @@
     </div>
     </div>
 </div>
+<script>
+    submitButton = document.getElementById("button-id-submit");
+    submitButton.type = "submit";
+</script>
 <script src="{% static 'js/add_location.js' %}"></script>
 {% endblock %}
 

@@ -1,6 +1,6 @@
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, ButtonHolder
+from crispy_forms.layout import Submit, Layout, Row, Column, ButtonHolder, Button
 
 
 class EnterLocationsForm(forms.Form):
@@ -29,8 +29,8 @@ class EnterLocationsForm(forms.Form):
             css_class='form-row'
         ),
         ButtonHolder(
-            Submit('submit', 'Go', css_class='btn btn-primary'),
-            Submit('add', '+', css_class="btn btn-success"),
+            Button('submit', 'Go', css_class='btn btn-primary'),
+            Button('add', '+', css_class="btn btn-success"),
             css_id="button-row",
         )
     )
@@ -45,5 +45,34 @@ class EnterLocationsForm(forms.Form):
             self.fields['extra_location_{}'.format(index)] = forms.CharField(
                 widget=forms.TextInput(attrs={'placeholder': 'Address {}'.format(str(3 + int(extra_locations)))})
             )
+
+
+class ContactForm(forms.Form):
+    email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': "Your Email"}), required=True)
+    subject = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Subject'}), required=True)
+    message = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Message'}), required=True)
+
+    helper = FormHelper()
+    helper.form_class = 'form-horizontal'
+    helper.form_method = 'POST'
+    helper.form_show_labels = False
+
+    helper.layout = Layout(
+        Row(
+            Column('email', css_class='form-group'),
+            css_class='form-row'
+        ),
+        Row(
+            Column('subject', css_class='form-group'),
+            css_class='form-row'
+        ),
+        Row(
+            Column('message', css_class='form-group'),
+            css_class='form-row'
+        ),
+        ButtonHolder(
+            Submit('submit', 'Submit', css_class='btn btn-primary')
+        )
+    )
 
 

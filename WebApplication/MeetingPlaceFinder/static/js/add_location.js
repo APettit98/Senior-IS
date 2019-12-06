@@ -1,7 +1,7 @@
 form_count = Number($("#count").val());
 target_element = $("#form_fields");
 
-$("#submit-id-add").click(function(){
+$("#button-id-add").click(function(){
     form_count ++;
 
     addressNumber = (form_count + 3).toString();
@@ -15,4 +15,5 @@ $("#submit-id-add").click(function(){
      "</div></div></div></div>").insertBefore($("#button-row"));
 
     $(`#${id}`).attr('placeholder', "Address " + addressNumber);
+    $("#count").val += 1;
 });

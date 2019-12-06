@@ -16,5 +16,8 @@ urlpatterns = [
     path('results/', views.results, name='results'),
 
     # /help
-    path('help/', views.help, name='help')
+    path('help/', views.help, name='help'),
+
+    # success on email send
+    path('success/', views.success, name='success'),
 ]

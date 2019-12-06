@@ -1,7 +1,14 @@
 {% extends './base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
 
 {% block content %}
 
-Contact
+<div class="row">
+    <h1>Contact Me</h1>
+</div>
+<div class="row ml-1">
+        {% crispy form %}
+</div>
 
 {% endblock %}

@@ -5,14 +5,15 @@
 
 
 {% block content %}
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
-<script src='https://unpkg.com/es6-promise@4.2.4/dist/es6-promise.auto.min.js'></script>
-<script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+<link href="{% static 'style/mapbox-gl.css' %}" rel="stylesheet"/>
 <link href="{% static 'style/results.css' %}" rel="stylesheet"/>
-<div class="row justify-content-center mt-3">
+<script src="{% static 'js/mapbox-gl.js' %}"></script>
+
+<div class="row justify-content-left mt-5">
     {{ location_list|json_script:"location_list" }}
-    <div class="col-6" id="map">
+    {{ location_geocodes|json_script:"location_geocodes" }}
+    <div class="col-8" id="map">
 
     </div>
     <div class="col-4">

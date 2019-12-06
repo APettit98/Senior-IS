@@ -2,5 +2,43 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+<h1>About</h1>
 
+<div class="row">
+    <div class="card border-primary mt-5">
+        <div class="card-body">
+            This application was created as the main software product of my Independent Study at the College of Wooster.
+            Its purpose is to find meeting places between 3 or more locations.
+            To do this, I created an algorithm <i>insert algorithm description here</i>
+        </div>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col md-6">
+        <div class="card">
+            <div class="card-header">
+                Implemented Features
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Contact Form</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col md-6">
+        <div class="card">
+            <div class="card-header">
+                Future Features
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Meeting-place algorithm</li>
+                <li class="list-group-item">Place Markers on the Map</li>
+                <li class="list-group-item">Display times to meeting place</li>
+                <li class="list-group-item">Display routes to meeting place</li>
+                <li class="list-group-item">Enable types of meeting places</li>
+                <li class="list-group-item">Create list of meeting places</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
