@@ -25,8 +25,10 @@ class EnterLocationsForm(forms.Form):
         ),
         Row(
             Column('location3', css_class='form-group'),
-            Column('extra_location_count'),
             css_class='form-row'
+        ),
+        Row(
+            Column('extra_location_count'),
         ),
         ButtonHolder(
             Button('submit', 'Go', css_class='btn btn-primary'),

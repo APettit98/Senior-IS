@@ -8,7 +8,7 @@ $("#button-id-add").click(function(){
     id = 'id_location' + addressNumber;
 
    $("<div class='form-row form-row'> " +
-     "<div class='formColumn form-group'> " +
+     "<div class='col form-group'> " +
      "<div class='form-group row'> " +
      "<div class=''> " +
      `<input type="text" name=${"location" + addressNumber} class="textinput textInput form-control" id=${id}>` +
