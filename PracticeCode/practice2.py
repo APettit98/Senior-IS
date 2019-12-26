@@ -1,7 +1,11 @@
 import osmnx as ox
 import math
 import networkx as nx
+import geopy
 import json
+from shapely import geometry
+import sys
+
 
 lchs_lat = 39.12
 lchs_long = -77.58
@@ -48,13 +52,13 @@ def get_travel_time(edge):
         'living_street': 15,
     }
 
-    distance_mi = edge['length'] / 1609.0 # convert from meters to miles
+    distance_mi = edge['length'] / 1609.0  # convert from meters to miles
     try:
         edge['maxspeed']
         if type(edge['maxspeed']) == str:
             maxspeed = int(edge['maxspeed'][:-3])
         elif type(edge['maxspeed']) == list:
-            maxspeed = int(edge['maxspeed'][-1][:-3])
+            maxspeed = int(edge['maxspeed'][-1][:-3])  # get highest speed, remove last three characters (mpg)
     except KeyError:
         road_type = edge['highway']
         try:
@@ -67,6 +71,7 @@ def get_travel_time(edge):
 
 
 def dijkstra(start, graph):
+    print("Dijkstra", type(graph))
     infinity = math.inf
     distances = {start: (0, None)}
     seen = []
@@ -106,12 +111,11 @@ test_graph.add_edges_from([("a", "b", {0: {'length': 1600, 'maxspeed': '55 mph'}
                            ("f", "g", {0: {'length': 750, 'maxspeed': '25 mpg'}})])
 
 
-def dijkstra_brute_force(start_nodes, graph):
+def dijkstra_brute_force(graph, start_nodes):
+    print("BF",type(graph))
     dijkstra_results = []
     for node in start_nodes:
         dijkstra_results.append(dijkstra(node, graph))
-    for res in dijkstra_results:
-        print(res)
 
     node_sums = {}
     for node in graph.nodes():
@@ -136,9 +140,106 @@ def dijkstra_brute_force(start_nodes, graph):
     return meeting_node, paths
 
 
-meeting_node, paths = dijkstra_brute_force(['a', 'd', 'f'], test_graph)
-print(meeting_node)
-print(paths)
+def to_coords(locations):
+    """
+    Get coordinates of given locations
+    :param locations: List of strings representing geographical locations
+    :return: list of tuples containing coordinates of locations
+    """
+    coordinates = []
+    locator = geopy.Nominatim(user_agent="myGeocoder", scheme='http')
+
+    for location in locations:
+        try:
+            location_coords = locator.geocode(location)[1]
+        except TypeError:
+            print("Invalid location: {}".format(location), file=sys.stderr)
+            return None
+        coordinates.append(location_coords)
+    return coordinates
+
+
+def create_graph(initial_locations):
+    """
+    Creates a graph to perform meeting place finding algorithm
+    :param initial_locations: List of strings containing initial locations
+    :return: Networkx graph and list of coordinate tuples
+    """
+    coordinates = to_coords(initial_locations)
+    lat = []
+    long = []
+
+    for c in coordinates:
+        lat.append(c[0])
+        long.append(c[1])
+
+    north = max(lat)
+    south = min(lat)
+    east = max(long)
+    west = min(long)
+
+    return ox.graph_from_bbox(north, south, east, west, network_type='drive')
+
+
+def find_meeting_place(initial_locations, algorithm="bf"):
+    """
+    Finds meeting place on graph between initial locations
+    :param initial_locations: List of strings containing initial locations
+    :param algorithm: String describing which algorithm to use
+    :return: Returns dictionary of relevant data of meeting place
+    """
+
+    G = create_graph(initial_locations)
+    print("init",type(G))
+    coordinates = to_coords(initial_locations)
+
+    if G is None:
+        print("Invalid location was specified", file=sys.stderr)
+        return None
+
+    if algorithm == "bf":
+        initial_nodes = []
+        for location in coordinates:
+            print("Adding node for {}".format(location))
+            initial_nodes.append(ox.get_nearest_node(G, location))
+        meeting_place, _ = dijkstra_brute_force(G, initial_nodes)
+    else:
+        return None
+
+    return meeting_place
+
+
+locations = [
+    "Loudoun County High School, Leesburg, VA",
+    "407 E Market St, Leesburg, VA",
+    "18 E Market St, Leesburg, VA"
+]
+
+print(find_meeting_place(locations))
+
+
+# locator = geopy.Nominatim(user_agent="myGeocoder", scheme='http')
+# lchs_coords = locator.geocode("Loudoun County High School, Leesburg, VA")[1]
+# douglass_coords = locator.geocode("407 E Market St, Leesburg, VA")[1]
+# court_coords = locator.geocode("18 E Market St, Leesburg, VA")[1]
+#
+# large_test_graph = ox.graph_from_place("Leesburg, Virginia, USA", network_type='drive')
+#
+# lchs = ox.get_nearest_node(large_test_graph, (lchs_coords[0], lchs_coords[1]))
+# douglass = ox.get_nearest_node(large_test_graph, (douglass_coords[0], douglass_coords[1]))
+# courthouse = ox.get_nearest_node(large_test_graph, (court_coords[0], court_coords[1]))
+#
+#
+# meeting_place, paths = dijkstra_brute_force([lchs, douglass, courthouse], large_test_graph)
+# node_data = dict(large_test_graph.nodes(data=True))
+# print(node_data[meeting_place])
+
+
+
+#meeting_node, paths = dijkstra_brute_force(['a', 'd', 'f'], test_graph)
+#print(meeting_node)
+#print(paths)
+
 
 def floyd_warshall(graph):
     infinity = math.inf

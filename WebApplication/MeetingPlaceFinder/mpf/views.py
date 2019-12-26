@@ -4,6 +4,7 @@ from .forms import EnterLocationsForm, ContactForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 import geopy
+from .algorithms import find_meeting_place
 
 
 def index(request):
@@ -11,7 +12,6 @@ def index(request):
         form = EnterLocationsForm(request.POST)
         if form.is_valid():
             locations = form.cleaned_data
-            print(locations)
             request.session['location_input'] = form.cleaned_data
             return HttpResponseRedirect('/results', {'locations': locations})
     else:
@@ -49,11 +49,13 @@ def success(request):
 def results(request):
     locations = request.session['location_input']
     location_list = list(locations.values())[:-1]
-    locator = geopy.Nominatim(user_agent="myGeocoder")
+    meeting_place = find_meeting_place(location_list)
+    locator = geopy.geocoders.Nominatim(user_agent="myGeocoder", scheme='http')
     location_geocodes = []
     for location in location_list:
         location_code = locator.geocode(location)
         location_geocodes.append(location_code[1])
+    location_geocodes.append((meeting_place['y'], meeting_place['x']))
     mapbox_private_token = "sk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazJwNWtodXgwMHQwM25ybXo1a3BmY295In0.7oyWAaqB1aJJJp9oGmZPug"
 
     return render(request, 'mpf/results.html', {'locations': locations, 'mapbox_private_token': mapbox_private_token,

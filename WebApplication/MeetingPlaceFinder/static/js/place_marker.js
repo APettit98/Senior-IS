@@ -2,6 +2,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzc
 
 var location_list = JSON.parse($("#location_list").text());
 var location_geocodes = JSON.parse($("#location_geocodes").text());
+console.log(location_geocodes)
 var feature_list = [];
 for(var i = 0; i < location_geocodes.length; i++){
     feature_list.push({
