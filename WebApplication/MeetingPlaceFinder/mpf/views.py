@@ -4,7 +4,7 @@ from .forms import EnterLocationsForm, ContactForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 import geopy
-from .algorithms import find_meeting_place
+from .algorithms import find_meeting_place, InvalidLocationError
 
 
 def index(request):
@@ -13,7 +13,7 @@ def index(request):
         if form.is_valid():
             locations = form.cleaned_data
             request.session['location_input'] = form.cleaned_data
-            return HttpResponseRedirect('/results', {'locations': locations})
+            return HttpResponseRedirect('/results', {'locations': locations, 'error': False})
     else:
         form = EnterLocationsForm()
 
@@ -49,7 +49,11 @@ def success(request):
 def results(request):
     locations = request.session['location_input']
     location_list = list(locations.values())[:-1]
-    meeting_place = find_meeting_place(location_list)
+    try:
+        meeting_place = find_meeting_place(location_list)
+    except InvalidLocationError as e:
+        print("InvalidLocationError occurred, views")
+        return render(request, 'mpf/index.html', {'form': EnterLocationsForm(), 'error': e.message})
     locator = geopy.geocoders.Nominatim(user_agent="myGeocoder", scheme='http')
     location_geocodes = []
     for location in location_list:

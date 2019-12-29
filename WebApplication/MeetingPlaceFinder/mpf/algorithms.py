@@ -2,7 +2,17 @@ import osmnx as ox
 import math
 import geopy
 import sys
-from shapely import geometry
+
+
+class InvalidLocationError(Exception):
+    """
+    Raised when an invalid location is given by the user
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return repr(self.message)
 
 
 def get_travel_time(edge):
@@ -128,8 +138,8 @@ def to_coords(locations):
         try:
             location_coords = locator.geocode(location)[1]
         except TypeError:
-            print("Invalid location: {}".format(location), file=sys.stderr)
-            return None
+            print("InvalidLocationError occurred, to_coords")
+            raise InvalidLocationError("Invalid location: {}".format(location))
         coordinates.append(location_coords)
     return coordinates
 
@@ -140,7 +150,12 @@ def create_graph(initial_locations):
     :param initial_locations: List of strings containing initial locations
     :return: Networkx graph
     """
-    coordinates = to_coords(initial_locations)
+    try:
+        coordinates = to_coords(initial_locations)
+    except InvalidLocationError as e:
+        print("InvalidLocationError occurred, create_graph")
+        raise e
+
     lat = []
     long = []
 
@@ -164,7 +179,12 @@ def find_meeting_place(initial_locations, algorithm="bf"):
     :return: Returns dictionary of relevant data of meeting place
     """
 
-    G = create_graph(initial_locations)
+    try:
+        G = create_graph(initial_locations)
+    except InvalidLocationError as e:
+        print("InvalidLocationError occurred, find_meeting_place")
+        raise e
+
     coordinates = to_coords(initial_locations)
 
     if G is None:

@@ -3,6 +3,11 @@
 {% load static %}
 
 {% block content %}
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% endif %}
 <div class="row mt-5 justify-content-around">
     <div class="col-4 mx-auto">
         <div class="card text-left border-primary mt-5 mx-auto">
