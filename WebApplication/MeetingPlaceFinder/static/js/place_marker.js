@@ -2,7 +2,6 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzc
 
 var location_list = JSON.parse($("#location_list").text());
 var location_geocodes = JSON.parse($("#location_geocodes").text());
-console.log(location_geocodes)
 var feature_list = [];
 for(var i = 0; i < location_geocodes.length; i++){
     feature_list.push({
@@ -25,16 +24,22 @@ features : feature_list
 var map = new mapboxgl.Map({
   container: "map", // container id
   style: "mapbox://styles/mapbox/streets-v10", // stylesheet location
-  center: [location_geocodes[0][1], location_geocodes[0][0]], // starting position [lng, lat]
-  zoom: 8 // starting zoom
+  center: [location_geocodes[location_geocodes.length - 1][1], location_geocodes[location_geocodes.length - 1][0]],
+  zoom: 12
 });
 
 markers = []
 geojson.features.forEach(function(marker) {
     markers.push(new mapboxgl.Marker()
      .setLngLat(marker.geometry.coordinates)
+     .setPopup(new mapboxgl.Popup({ offset: 25 })
+        .setHTML('<p>' + marker.properties.title + '</p>'))
      .addTo(map));
 });
+
+$(document).ready(function(){
+    map.fitBounds(location_geocodes)
+})
 
 //for(i = 0; i < location_list.length; i++){
 //    var mapboxClient = mapboxSdk({ accessToken: mapboxgl.privateToken });

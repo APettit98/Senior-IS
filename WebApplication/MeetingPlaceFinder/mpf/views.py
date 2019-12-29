@@ -56,6 +56,9 @@ def results(request):
         location_code = locator.geocode(location)
         location_geocodes.append(location_code[1])
     location_geocodes.append((meeting_place['y'], meeting_place['x']))
+    meeting_place_text = locator.reverse((meeting_place['y'], meeting_place['x'])).address
+    print(meeting_place_text)
+    location_list.append(meeting_place_text)
     mapbox_private_token = "sk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazJwNWtodXgwMHQwM25ybXo1a3BmY295In0.7oyWAaqB1aJJJp9oGmZPug"
 
     return render(request, 'mpf/results.html', {'locations': locations, 'mapbox_private_token': mapbox_private_token,
