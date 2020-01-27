@@ -1,52 +1,26 @@
 from django import forms
+from django.forms.formsets import formset_factory
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, ButtonHolder, Button
+from crispy_forms.layout import Submit, Layout, Row, Column, ButtonHolder
+import logging
+
+logging.basicConfig(format="%(asctime)s - %(message)s",
+                    datefmt='%d-%b-%y %H:%M:%S')
+logger = logging.getLogger("mpfLogger")
+
+mapbox_access_token = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzcm95ZmlxIn0.pRSXcRGiHLQfxj4AH1_lGg'
 
 
 class EnterLocationsForm(forms.Form):
-    template_name = 'mpf/index.html'
-    location1 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Address 1'}))
-    location2 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Address 2'}))
-    location3 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Address 3'}))
-    extra_location_count = forms.CharField(widget=forms.HiddenInput(attrs={'id': 'count'}), initial=0)
-
-    helper = FormHelper()
-    helper.form_class = 'form-horizontal'
-    helper.form_method = 'POST'
-    helper.form_show_labels = False
-    helper.layout = Layout(
-        Row(
-            Column('location1', css_class='form-group'),
-            css_class='form-row'
-        ),
-        Row(
-            Column('location2', css_class='form-group'),
-            css_class='form-row'
-        ),
-        Row(
-            Column('location3', css_class='form-group'),
-            css_class='form-row'
-        ),
-        Row(
-            Column('extra_location_count'),
-        ),
-        ButtonHolder(
-            Button('submit', 'Go', css_class='btn btn-primary'),
-            Button('add', '+', css_class="btn btn-success"),
-            css_id="button-row",
-        )
-    )
-
     def __init__(self, *args, **kwargs):
-        extra_locations = kwargs.pop('extra', 0)
+        super(EnterLocationsForm, self).__init__(*args, **kwargs)
 
-        super().__init__(*args, **kwargs)
-        self.fields['extra_location_count'].initial = extra_locations
 
-        for index in range(int(extra_locations)):
-            self.fields['extra_location_{}'.format(index)] = forms.CharField(
-                widget=forms.TextInput(attrs={'placeholder': 'Address {}'.format(str(3 + int(extra_locations)))})
-            )
+class SingleLocationForm(forms.Form):
+    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter an Address'}), required=True)
+
+
+LocationFormSet = formset_factory(SingleLocationForm, extra=3)
 
 
 class ContactForm(forms.Form):
@@ -76,5 +50,4 @@ class ContactForm(forms.Form):
             Submit('submit', 'Submit', css_class='btn btn-primary')
         )
     )
-
 

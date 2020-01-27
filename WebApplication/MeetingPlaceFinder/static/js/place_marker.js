@@ -37,9 +37,9 @@ geojson.features.forEach(function(marker) {
      .addTo(map));
 });
 
-$(document).ready(function(){
-    map.fitBounds(location_geocodes)
-})
+//$(document).ready(function(){
+//    map.fitBounds(location_geocodes)
+//})
 
 //for(i = 0; i < location_list.length; i++){
 //    var mapboxClient = mapboxSdk({ accessToken: mapboxgl.privateToken });

@@ -29,17 +29,49 @@
             Find a Meeting Place!
         </div>
         <div class="card-body mx-auto">
-            <div id="form_fields">
-                {% crispy form %}
+            <form method="post">
+                {% csrf_token %}
+                {{ location_formset.management_form }}
+
+                {% for location_form in location_formset %}
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <div class="input-group">
+                                {{ location_form.location }}
+                                {% if forloop.last %}
+                                <div class="input-group-append">
+                                    <button class="btn btn-success add-form-row">+</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if location_form.location.errors %}
+                        {% for error in location_form.location.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if location_formset.non_form_errors %}
+                    {% for error in location_formset.non_form_errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+                 <button type="submit" class="btn btn-primary">Go</button>
+            </form>
             </div>
         </div>
     </div>
     </div>
 </div>
-<script>
-    submitButton = document.getElementById("button-id-submit");
-    submitButton.type = "submit";
-</script>
 <script src="{% static 'js/add_location.js' %}"></script>
+<script src="{% static 'js/django-dynamic-formset/src/jquery.formset.js' %}"></script>
+<!--<script>-->
+<!--    $('.location-formset').formset({-->
+<!--        addText: '+',-->
+<!--        deleteText: 'x'-->
+<!--    });-->
+<!--</script>-->
 {% endblock %}
 
