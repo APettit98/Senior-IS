@@ -12,8 +12,8 @@ mapbox_access_token = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzcm
 
 
 class EnterLocationsForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        super(EnterLocationsForm, self).__init__(*args, **kwargs)
+    CHOICES = [(1, 'Exact'), (2, 'Neighbor Walk'), (3, 'Midpoint Intersection')]
+    algorithm = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
 
 
 class SingleLocationForm(forms.Form):

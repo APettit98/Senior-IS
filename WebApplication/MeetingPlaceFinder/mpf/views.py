@@ -37,8 +37,10 @@ def index(request):
             globals()['most_recent_enter_locations_form'] = enter_locations_form
             globals()['most_recent_location_formset'] = location_formset
 
+            logger.info("Enter_Locations_Form: {}".format(enter_locations_form.cleaned_data))
             locations = [address['location'] for address in location_formset.cleaned_data]
             request.session['location_input'] = locations
+            request.session['algorithm'] = enter_locations_form.cleaned_data['algorithm']
 
             logger.info("Redirecting to results with locations: {}".format(locations))
 
@@ -111,7 +113,14 @@ def results(request):
     """
     logger.info("Creating results view")
 
+    algorithm_options = {'1': 'Brute-Force',
+                         '2': "Neighbor-Walk",
+                         '3': 'Midpoint-Intersection'}
+
     locations = request.session['location_input']
+    algorithm_idx = request.session['algorithm']
+
+    algorithm = algorithm_options[algorithm_idx]
 
     logger.info("Geocoding user-given locations")
     locator = geopy.geocoders.MapBox(mapbox_access_token)
@@ -135,11 +144,13 @@ def results(request):
 
     logger.info("Location list: {}".format(locations))
     try:
-        meeting_place = find_meeting_place(location_geocodes)
+        meeting_place, _ = find_meeting_place(location_geocodes, algorithm=algorithm)
     except InvalidLocationError as e:
         logger.error("InvalidLocationError found: {}".format(e.message))
         logger.info("Redirecting to home page with error notification")
         return render(request, 'mpf/index.html', {'form': EnterLocationsForm(), 'error': e.message})
+
+    logger.info("Found meeting place: {}".format(meeting_place))
 
     location_geocodes.append((meeting_place['y'], meeting_place['x']))
 

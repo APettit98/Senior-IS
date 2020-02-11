@@ -3,7 +3,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzc
 var location_list = JSON.parse($("#location_list").text());
 var location_geocodes = JSON.parse($("#location_geocodes").text());
 var feature_list = [];
-for(var i = 0; i < location_geocodes.length; i++){
+for(var i = 0; i < location_geocodes.length - 1; i++){
     feature_list.push({
         type: 'Feature',
         geometry: {
@@ -15,6 +15,17 @@ for(var i = 0; i < location_geocodes.length; i++){
         }
     });
 }
+var i = location_geocodes.length - 1;
+feature_list.push({
+        type: 'Feature',
+        geometry: {
+            type: 'Point',
+            coordinates: [location_geocodes[i][1], location_geocodes[i][0]]
+        },
+        properties: {
+            title: location_list[i],
+        }
+    });
 //
 var geojson = {
 type: 'FeatureCollection',
@@ -29,9 +40,16 @@ var map = new mapboxgl.Map({
 });
 
 markers = []
-geojson.features.forEach(function(marker) {
-    markers.push(new mapboxgl.Marker()
-     .setLngLat(marker.geometry.coordinates)
+geojson.features.forEach(function(marker, idx, array) {
+    var color;
+    if (idx === array.length - 1){
+       color = "#00FF17";
+    }
+    else{
+       color = "#1700FF";
+    }
+    markers.push(new mapboxgl.Marker({"color": color})
+    .setLngLat(marker.geometry.coordinates)
      .setPopup(new mapboxgl.Popup({ offset: 25 })
         .setHTML('<p>' + marker.properties.title + '</p>'))
      .addTo(map));
