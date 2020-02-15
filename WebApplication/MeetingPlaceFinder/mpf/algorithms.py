@@ -125,13 +125,16 @@ def dijkstra_brute_force(graph, initial_nodes):
     for node in graph.nodes():
         node_sum = 0
         for result in dijkstra_results:
-            node_sum += result[node][0]
+            if node in result:
+                node_sum += result[node]
+            else:
+                node_sum = math.inf
         if node_sum < minimum_node[1]:
             minimum_node = (node, node_sum)
 
-    paths = [path[minimum_node] for path in paths]
+    paths = [path[minimum_node[0]] for path in paths]
 
-    return minimum_node, paths
+    return minimum_node[0], paths
 
 
 def geographic_mean_neighbor_walk(graph, initial_nodes, mean_coordinate, max_depth, with_paths=False):

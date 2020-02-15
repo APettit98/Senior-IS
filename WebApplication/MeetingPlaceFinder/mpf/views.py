@@ -114,8 +114,7 @@ def results(request):
     logger.info("Creating results view")
 
     algorithm_options = {'1': 'Brute-Force',
-                         '2': "Neighbor-Walk",
-                         '3': 'Midpoint-Intersection'}
+                         '2': "Neighbor-Walk"}
 
     locations = request.session['location_input']
     algorithm_idx = request.session['algorithm']

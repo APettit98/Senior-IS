@@ -12,7 +12,7 @@ mapbox_access_token = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzcm
 
 
 class EnterLocationsForm(forms.Form):
-    CHOICES = [(1, 'Exact'), (2, 'Neighbor Walk'), (3, 'Midpoint Intersection')]
+    CHOICES = [(1, 'Exact'), (2, 'Approximate')]
     algorithm = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
 
 
