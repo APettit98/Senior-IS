@@ -11,10 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
 from django.utils.log import DEFAULT_LOGGING
-import logging
 import logging.config
 
 
