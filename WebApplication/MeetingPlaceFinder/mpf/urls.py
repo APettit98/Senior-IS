@@ -1,9 +1,6 @@
 from django.urls import path
 from . import views
-
-
-def trigger_error(request):
-    division_by_zero = 1 / 0
+# This file is created by Django and used to register the urls for the application
 
 
 urlpatterns = [
@@ -24,6 +21,4 @@ urlpatterns = [
 
     # success on email send
     path('success/', views.success, name='success'),
-
-    path('sentry-debug/', trigger_error)
 ]

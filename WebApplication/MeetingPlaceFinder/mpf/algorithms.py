@@ -1,9 +1,9 @@
-from multiprocessing import Pool
 import osmnx as ox
 import networkx as nx
 import math
 import geopy
 from geopy import exc
+from collections import Counter
 import sys
 import time
 import logging
@@ -56,14 +56,18 @@ def get_travel_time(endpoint_1, endpoint_2, edge):
     distance_mi = edge['length'] / 1609.0  # convert from meters to miles
     if 'maxspeed' in edge:
         if type(edge['maxspeed']) == str:
-            if 'mph' in edge['maxspeed']:
+            if '-' in edge['maxspeed']:
+                maxspeed = int(edge['maxspeed'][0:2])
+            elif 'mph' in edge['maxspeed']:
                 maxspeed = int(edge['maxspeed'][:-3])
             else:
                 maxspeed = int(edge['maxspeed'])
         elif type(edge['maxspeed']) == list:
             maxspeeds = []
             for speed in edge['maxspeed']:
-                if 'mph' in speed:
+                if '-' in speed:
+                    maxspeeds.append(int(speed[0:2]))
+                elif 'mph' in speed:
                     maxspeeds.append(int(speed[:-3]))
                 else:
                     maxspeeds.append(int(speed))
@@ -137,105 +141,90 @@ def dijkstra_brute_force(graph, initial_nodes):
     return minimum_node[0], paths
 
 
-def geographic_mean_neighbor_walk(graph, initial_nodes, mean_coordinate, max_depth, with_paths=False):
+def geographic_mean_path_traversal(graph, initial_nodes, initial_locations, with_paths=False):
     """
-    Algorithm which finds meeting place by starting at the geographic middle point and iterating through nodes
-    in its neighborhood to see if any are better. If so, it travels to the best node and searches its neighborhood.
-    The process repeats until no better node is found or max depth is reached.
+    Algorithm which finds meeting place by starting at the geographic middle point and travelling along the
+    path that travels towards the majority of the inital locations until no such majority path exists
 
     :param graph: Networkx Graph
     :param initial_nodes: list of nodes to use as starting locations
-    :param mean_coordinate: Geographic mean of the initial points given by the user
-    :param max_depth: Maximum depth of neighbor walk
+    :param initial_locations: list of tuples with coordinates of initial locations
     :param with_paths: Boolean determining if algorithm will find paths to meeting point
     :return: Meeting node, paths; if with_paths = False then paths=None
     """
 
-    middle_node = ox.get_nearest_node(graph, mean_coordinate)
-    dist_to_middle = 0
-    found_distances = {}
-    for node in initial_nodes:
-        found_distances[node] = {middle_node: nx.single_source_dijkstra(graph, node, target=middle_node, weight=get_travel_time)}
-
-    minimum_node = (middle_node, dist_to_middle)
-    new_best_found = True
-    max_depth = int(max_depth)
-    current_depth = 0
-    while new_best_found and current_depth < max_depth:
-        current_node = minimum_node[0]
-        new_best_found = False
-        for neighbor in graph.neighbors(current_node):
-            node_dist = 0
-            for node in initial_nodes:
-                if neighbor in found_distances[node]:
-                    node_dist += found_distances[node][neighbor][0]
-
-                found_distances[node] = {neighbor:nx.single_source_dijkstra(graph, node, target=neighbor, weight=get_travel_time)}
-                node_dist += found_distances[node][neighbor][0]
-
-            if node_dist < minimum_node[1]:
-                minimum_node = (neighbor, node_dist)
-                new_best_found = True
-
-        current_depth += 1
-
-    if with_paths:
-        paths = [nx.dijkstra_path(graph, source, minimum_node[0], weight=get_travel_time) for source in initial_nodes]
-    else:
-        paths = None
-
-    return minimum_node[0], paths
-
-
-def midpoint_intersection(graph, initial_locations, with_paths=False):
-    """
-    Algorithm which finds a meeting place by taking the geographic mean of all but one point and finding the path
-    from the removed point to the mean point. This is done for all points, then the algorithm finds nodes which exist
-    on at least two paths and check those nodes to determine which one is best. If no such intersections exists, then
-    the algorithm checks the mean nodes found and the overall geographic mean.
-
-    :param graph: Networkx Graph
-    :param initial_nodes: list of nodes to use as starting locations
-    :param with_paths: Boolean determining if algorithm will find paths to meeting point
-    :return: Meeting node, paths; if with_paths = False then paths=None
-    """
-    midpoints = []
+    lat_sum = 0
+    long_sum = 0
+    num_locations = len(initial_locations)
     for location in initial_locations:
-        copy = initial_locations.copy()
-        copy.remove(location)
-        midpoints.append(find_average_coordinate(copy))
+        lat_sum += location[0]
+        long_sum += location[1]
 
-    initial_nodes = [ox.get_nearest_node(graph, location) for location in initial_locations]
-    midpoint_nodes = [ox.get_nearest_node(graph, m) for m in midpoints]
+    mean_coordinate = (lat_sum / num_locations, long_sum / num_locations)
+    middle_node = ox.get_nearest_node(graph, mean_coordinate)
+    distances, paths = nx.single_source_dijkstra(graph, middle_node, weight=get_travel_time)
 
-    on_path = nx.dijkstra_path(graph, initial_nodes[0], midpoint_nodes[0], weight=get_travel_time)
-    for i in range(1, len(initial_nodes)):
-        i_path = nx.dijkstra_path(graph, initial_nodes[i], midpoint_nodes[i], weight=get_travel_time)
-        on_path = on_path + i_path
+    paths_to_start = []
+    shortest_path_length = math.inf
+    for node in initial_nodes:
+        path_to_node = paths[node]
+        paths_to_start.append(paths[node])
+        if len(path_to_node) < shortest_path_length:
+            shortest_path_length = len(path_to_node)
 
-    intersections = [node for node in on_path if on_path.count(node) >= 2]
+    if shortest_path_length < 2:
+        meeting_node = middle_node
+    else:
+        first_steps = [path[1] for path in paths_to_start]
+        most_frequent_step = Counter(first_steps).most_common(1)
+        previous_step = most_frequent_step[0]
+        most_frequent_step = most_frequent_step[0]
+        current_step = 1
+        while most_frequent_step[1] > (len(initial_nodes) / 2) and current_step + 1 < shortest_path_length:
+            next_steps = [path[current_step + 1] for path in paths_to_start]
+            previous_step = most_frequent_step
+            most_frequent_step = Counter(next_steps).most_common(1)[0]
+            current_step += 1
 
-    if len(intersections) == 1:
-        return intersections[0], None
-
-    elif len(intersections) == 0:
-        midpoint_nodes.append(ox.get_nearest_node(graph, find_average_coordinate(initial_locations)))
-        intersections = midpoint_nodes
-
-    minimum_node = (None, math.inf)
-    for node in intersections:
-        node_length = 0
-        for init in initial_nodes:
-            node_length += nx.dijkstra_path_length(graph, init, node, weight=get_travel_time)
-        if node_length < minimum_node[1]:
-            minimum_node = (node, node_length)
+        meeting_node = previous_step[0]
 
     if with_paths:
-        paths = [nx.dijkstra_path(graph, source, minimum_node[0], weight=get_travel_time) for source in initial_nodes]
+        paths = [paths[node] for node in initial_nodes]
     else:
         paths = None
 
-    return minimum_node[0], paths
+    return meeting_node, paths
+
+
+def geographic_mean(graph, initial_nodes, initial_locations, with_paths=False):
+    """
+    Algorithm which finds meeting place by finding the geographic middle point
+
+    :param graph: Networkx Graph
+    :param initial_nodes: list of nodes to use as starting locations
+    :param initial_locations: list of tuples with coordinates of initial locations
+    :param with_paths: Boolean determining if algorithm will find paths to meeting point
+    :return: Meeting node, paths; if with_paths = False then paths=None
+    """
+
+    lat_sum = 0
+    long_sum = 0
+    num_locations = len(initial_locations)
+    for location in initial_locations:
+        lat_sum += location[0]
+        long_sum += location[1]
+
+    mean_coordinate = (lat_sum / num_locations, long_sum / num_locations)
+    middle_node = ox.get_nearest_node(graph, mean_coordinate)
+
+    if with_paths:
+        paths = []
+        for node in initial_nodes:
+            paths.append(nx.single_source_dijkstra(node, middle_node, weight=get_travel_time)[1])
+    else:
+        paths = None
+
+    return middle_node, paths
 
 
 def to_coords(locations, retries=0):
@@ -295,7 +284,7 @@ def create_graph(initial_locations):
     return ox.graph_from_bbox(north, south, east, west, network_type='drive', truncate_by_edge=True, clean_periphery=True)
 
 
-def find_meeting_place(initial_locations, algorithm="Brute-Force"):
+def find_meeting_place(initial_locations, algorithm="Brute-Force", graph=None):
     """
     Finds meeting place on graph between initial locations
     :param initial_locations: List of tuples containing initial location geocodes (lat, long)
@@ -305,12 +294,15 @@ def find_meeting_place(initial_locations, algorithm="Brute-Force"):
     logger.info("find_meeting_place begins execution")
     start_time = int(round(time.time() * 1000))
 
-    try:
-        logger.info("Try creating graph")
-        G = create_graph(initial_locations)
-    except InvalidLocationError as e:
-        logger.error("Unable to create a graph")
-        raise e
+    if graph:
+        G = graph
+    else:
+        try:
+            logger.info("Try creating graph")
+            G = create_graph(initial_locations)
+        except InvalidLocationError as e:
+            logger.error("Unable to create a graph")
+            raise e
 
     logger.info("Successfully created graph")
 
@@ -325,15 +317,17 @@ def find_meeting_place(initial_locations, algorithm="Brute-Force"):
             initial_nodes.append(ox.get_nearest_node(G, location))
         meeting_place, paths = dijkstra_brute_force(G, initial_nodes)
 
-    elif algorithm == "Neighbor-Walk":
+    elif algorithm == "Path-Traversal":
         initial_nodes = []
         for location in initial_locations:
             initial_nodes.append(ox.get_nearest_node(G, location))
-        middle_node = find_average_coordinate(initial_locations)
-        meeting_place, paths = geographic_mean_neighbor_walk(G, initial_nodes, middle_node, 15)
+        meeting_place, paths = geographic_mean_path_traversal(G, initial_nodes, initial_locations)
 
-    elif algorithm == "Midpoint-Intersection":
-        meeting_place, paths = midpoint_intersection(G, initial_locations)
+    elif algorithm == "Geographic-Mean":
+        initial_nodes = []
+        for location in initial_locations:
+            initial_nodes.append(ox.get_nearest_node(G, location))
+        meeting_place, paths = geographic_mean(G, initial_nodes, initial_locations)
 
     logger.info("Meeting place found")
     node_data = dict(G.nodes(data=True))[meeting_place]

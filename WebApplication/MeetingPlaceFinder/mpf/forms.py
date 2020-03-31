@@ -12,18 +12,33 @@ mapbox_access_token = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzcm
 
 
 class EnterLocationsForm(forms.Form):
-    CHOICES = [(1, 'Exact'), (2, 'Approximate')]
-    algorithm = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
+    """
+    This class creates a form with a slider bar that allows the user to pick which algorithm they
+    want to use based on how they prioritize speed versus accuracy
+    """
+    algorithm = forms.IntegerField(widget=forms.NumberInput(attrs={'type': 'range', 'step': '1',
+                                                                   'min': '1', 'max': '100', 'default': '50'}),
+                                   label='')
 
 
 class SingleLocationForm(forms.Form):
+    """
+    This is the template for the form that allows users to enter locations they want to meet between
+    This class specifies the field for entering a single location
+    """
     location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter an Address'}), required=True)
 
 
+# Creating a formset of SingleLocationForms creates multiple within the same form
+# By default it starts with 3 location fields
 LocationFormSet = formset_factory(SingleLocationForm, extra=3)
 
 
 class ContactForm(forms.Form):
+    """
+    This form is used for the contact page,
+    it allows users to enter information for an email to be sent to me
+    """
     email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': "Your Email"}), required=True)
     subject = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Subject'}), required=True)
     message = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Message'}), required=True)

@@ -118,16 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Logging stuff
 
-
-sentry_sdk.init(
-    dsn="https://f3fb8215ebce45bc92dc97f5ccf8f017@sentry.io/1881752",
-    integrations=[DjangoIntegration()],
-
-    # If you wish to associate users to errors (assuming you are using
-    # django.contrib.auth) you may enable sending PII data.
-    send_default_pii=True
-)
-
 LOGGING_CONFIG = None
 logging.config.dictConfig({
     'version': 1,
@@ -144,22 +134,17 @@ logging.config.dictConfig({
             'class': 'logging.StreamHandler',
             'formatter': 'console',
         },
-        # Add Handler for Sentry for `warning` and above
-        'sentry': {
-            'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
         'django.server': DEFAULT_LOGGING['handlers']['django.server'],
     },
     'loggers': {
     # root logger
         '': {
             'level': 'WARNING',
-            'handlers': ['console', 'sentry'],
+            'handlers': ['console'],
         },
         'mpfLogger': {
             'level': 'INFO',
-            'handlers': ['console', 'sentry'],
+            'handlers': ['console'],
             'propagate': False,
         },
         'django.server': DEFAULT_LOGGING['loggers']['django.server'],
@@ -185,8 +170,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587

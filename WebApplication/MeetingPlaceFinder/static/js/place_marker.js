@@ -1,9 +1,11 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiYXBldHRpdCIsImEiOiJjazNscmN1czcwOHRsM29sanhzcm95ZmlxIn0.pRSXcRGiHLQfxj4AH1_lGg';
 
+// Parse list of (lat, long) coordinates and create points with
+// those coordinates
 var location_list = JSON.parse($("#location_list").text());
 var location_geocodes = JSON.parse($("#location_geocodes").text());
 var feature_list = [];
-for(var i = 0; i < location_geocodes.length - 1; i++){
+for(var i = 0; i < location_geocodes.length; i++){
     feature_list.push({
         type: 'Feature',
         geometry: {
@@ -15,30 +17,22 @@ for(var i = 0; i < location_geocodes.length - 1; i++){
         }
     });
 }
-var i = location_geocodes.length - 1;
-feature_list.push({
-        type: 'Feature',
-        geometry: {
-            type: 'Point',
-            coordinates: [location_geocodes[i][1], location_geocodes[i][0]]
-        },
-        properties: {
-            title: location_list[i],
-        }
-    });
-//
+
+// Create geojson object
 var geojson = {
 type: 'FeatureCollection',
 features : feature_list
 };
 
+// Create a mapbox map
 var map = new mapboxgl.Map({
   container: "map", // container id
   style: "mapbox://styles/mapbox/streets-v10", // stylesheet location
   center: [location_geocodes[location_geocodes.length - 1][1], location_geocodes[location_geocodes.length - 1][0]],
-  zoom: 12
+  zoom: 8
 });
 
+// Create markers, making the meeting point a different color than the others
 markers = []
 geojson.features.forEach(function(marker, idx, array) {
     var color;
@@ -54,28 +48,3 @@ geojson.features.forEach(function(marker, idx, array) {
         .setHTML('<p>' + marker.properties.title + '</p>'))
      .addTo(map));
 });
-
-//$(document).ready(function(){
-//    map.fitBounds(location_geocodes)
-//})
-
-//for(i = 0; i < location_list.length; i++){
-//    var mapboxClient = mapboxSdk({ accessToken: mapboxgl.privateToken });
-//    var geocode = mapboxClient.geocoding.forwardGeocode({
-//        query: location_list[i],
-//        autocomplete: false,
-//        limit: 1
-//        });
-//        console.log(geocode);
-//    }).send().then(function (response) {
-//        if (response && response.body && response.body.features && response.body.features.length) {
-//        var feature = response.body.features[0];
-//
-//        new mapboxgl.Marker()
-//            .setLngLat(feature.center)
-//            .addTo(map);
-//        }
-//    });
-//}
-
-

@@ -8,6 +8,9 @@
             {{ error }}
         </div>
     {% endif %}
+<style>
+    div.form-row ul {list-style:none}
+</style>
 <div class="row mt-5 justify-content-around">
     <div class="col-4 mx-auto">
         <div class="card text-left border-primary mt-5 mx-auto">
@@ -17,7 +20,7 @@
             <div class="card-body">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><b>Step 1:</b> Type in your starting addresses (press the '+' to add more if needed)</li>
-                    <li class="list-group-item"><b>Step 2:</b> Select which algorithm to use: <i>Exact</i> guarantees the best meeting point and <i>Approximate</i> finishes faster</li>
+                    <li class="list-group-item"><b>Step 2:</b> Use the slider to determine whether or not accuracy or speed is more important to you</li>
                     <li class="list-group-item"><b>Step 3:</b> Press 'Go'</li>
                     <li class="list-group-item"><b>Step 4:</b> That's it! The application is finding your meeting place and will show it to you as soon as possible</li>
                 </ul>
@@ -29,13 +32,13 @@
         <div class="card-header">
             Find a Meeting Place!
         </div>
-        <div class="card-body mx-auto">
+        <div class="card-body mx-auto justify-content-center">
             <form method="post">
                 {% csrf_token %}
                 {{ location_formset.management_form }}
 
                 {% for location_form in location_formset %}
-                    <div class="form-row">
+                    <div class="form-row location-row">
                         <div class="col form-group">
                             <div class="input-group">
                                 {{ location_form.location }}
@@ -60,7 +63,9 @@
                     {% endfor %}
                 {% endif %}
                 <div class="form-row text-left">
+                    <label>Speed </label>
                     {{ enter_locations_form }}
+                    <label> Accuracy</label>
                 </div>
                  <button type="submit" class="btn btn-primary">Go</button>
             </form>
@@ -71,11 +76,5 @@
 </div>
 <script src="{% static 'js/add_location.js' %}"></script>
 <script src="{% static 'js/django-dynamic-formset/src/jquery.formset.js' %}"></script>
-<!--<script>-->
-<!--    $('.location-formset').formset({-->
-<!--        addText: '+',-->
-<!--        deleteText: 'x'-->
-<!--    });-->
-<!--</script>-->
 {% endblock %}
 

@@ -3,5 +3,22 @@
 {% block content %}
 
 <h1>Help</h1>
+<div class="accordion" id="accordionExample">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h2 class="mb-0">
+        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          The app isn't using the initial locations that I entered
+        </button>
+      </h2>
+    </div>
+
+    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+      <div class="card-body">
+          Sometimes the geolocater finds an identical address in another state and ignores the state you provided if you only use the state abbreviation. To fix this error, use the full state name (eg Ohio instead of OH). I'm not 100% sure why this error occurs, I hope to eventually ensure that state abbreviations can always be used.
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
